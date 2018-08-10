@@ -1,0 +1,26 @@
+{
+  "name": "gol-tfjs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=8.11.0"
+  },
+  "dependencies": {
+    "@types/node": "^8.0.53",
+    "@tensorflow/tfjs": "^0.12.1",
+    "@tensorflow/tfjs-node": "^0.1.9",
+    "express": "^4.16.2",
+    "http-server": "^0.10.0",
+    "webpack": "^3.8.1"
+  },
+  "devDependencies": {
+    "ts-loader": "^3.1.1",
+    "typescript": "^2.6.2"
+  },
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "server": "http-server"
+  }
+}

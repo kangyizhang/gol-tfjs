@@ -27,10 +27,9 @@
 // import {expectArrayInMeanStdRange} from 'deeplearn/dist/test_util';
 // import {Server} from 'http';
 // import {setTimeout} from 'timers';
-import '@tensorflow/tfjs-node';
-
 import * as tf from '@tensorflow/tfjs';
 import {Tensor, Tensor2D} from '@tensorflow/tfjs';
+// import * as tfn from '@tensorflow/tfjs-node';
 
 /** TODO(kreeger): Doc me. */
 class GameOfLife {
@@ -126,199 +125,254 @@ class GameOfLife {
 }
 
 /* Draws Game Of Life sequences */
-class WorldDisplay {
-  rootElement: Element;
+// class WorldDisplay {
+//   rootElement: Element;
 
-  constructor() {
-    this.rootElement = document.createElement('div');
-    this.rootElement.setAttribute('class', 'world-display');
+//   constructor() {
+//     this.rootElement = document.createElement('div');
+//     this.rootElement.setAttribute('class', 'world-display');
 
-    document.querySelector('.worlds-display').appendChild(this.rootElement);
-  }
+//     document.querySelector('.worlds-display').appendChild(this.rootElement);
+//   }
 
-  displayWorld(world: Tensor2D, title: string): Element {
-    let worldElement = document.createElement('div');
-    worldElement.setAttribute('class', 'world');
+//   displayWorld(world: Tensor2D, title: string): Element {
+//     let worldElement = document.createElement('div');
+//     worldElement.setAttribute('class', 'world');
 
-    let titleElement = document.createElement('div');
-    titleElement.setAttribute('class', 'title');
-    titleElement.innerText = title;
-    worldElement.appendChild(titleElement);
+//     let titleElement = document.createElement('div');
+//     titleElement.setAttribute('class', 'title');
+//     titleElement.innerText = title;
+//     worldElement.appendChild(titleElement);
 
-    let boardElement = document.createElement('div');
-    boardElement.setAttribute('class', 'board');
+//     let boardElement = document.createElement('div');
+//     boardElement.setAttribute('class', 'board');
 
-    for (let i = 0; i < world.shape[0]; i++) {
-      let rowElement = document.createElement('div');
-      rowElement.setAttribute('class', 'row');
+//     for (let i = 0; i < world.shape[0]; i++) {
+//       let rowElement = document.createElement('div');
+//       rowElement.setAttribute('class', 'row');
 
-      for (let j = 0; j < world.shape[1]; j++) {
-        let columnElement = document.createElement('div');
-        columnElement.setAttribute('class', 'column');
-        if (world.get(i, j) == 1) {
-          columnElement.classList.add('alive');
-        } else {
-          columnElement.classList.add('dead');
-        }
-        rowElement.appendChild(columnElement);
+//       for (let j = 0; j < world.shape[1]; j++) {
+//         let columnElement = document.createElement('div');
+//         columnElement.setAttribute('class', 'column');
+//         if (world.get(i, j) == 1) {
+//           columnElement.classList.add('alive');
+//         } else {
+//           columnElement.classList.add('dead');
+//         }
+//         rowElement.appendChild(columnElement);
+//       }
+//       boardElement.appendChild(rowElement);
+//     }
+
+//     worldElement.appendChild(boardElement);
+//     this.rootElement.appendChild(worldElement);
+//     return worldElement;
+//   }
+// }
+
+// class WorldContext {
+//   worldDisplay: WorldDisplay;
+//   world: Tensor2D;
+//   worldNext: Tensor2D;
+//   predictionElement: Element = null;
+
+//   constructor(worlds: [Tensor2D, Tensor2D]) {
+//     this.worldDisplay = new WorldDisplay();
+
+//     this.world = worlds[0];
+//     this.worldNext = worlds[1];
+//     this.worldDisplay.displayWorld(this.world, 'Sequence');
+//     this.worldDisplay.displayWorld(this.worldNext, 'Next Sequence');
+//   }
+
+//   displayPrediction(prediction: Tensor2D) {
+//     if (this.predictionElement) {
+//       this.predictionElement.remove();
+//     }
+//     this.predictionElement =
+//         this.worldDisplay.displayWorld(prediction, 'Prediction');
+//   }
+// }
+
+// class TrainDisplay {
+//   element: Element;
+
+//   constructor() {
+//     this.element = document.querySelector('.train-display');
+//   }
+
+//   logCost(cost: number) {
+//     const costElement = document.createElement('div');
+//     costElement.setAttribute('class', 'cost');
+//     costElement.innerText = '* Cost: ' + cost;
+//     this.element.appendChild(costElement);
+//   }
+
+//   showStep(step: number, steps: number) {
+//     this.element.innerHTML = 'Trained ' + Math.trunc(step / steps * 100) +
+//     '%';
+//   }
+// }
+
+function reshape(
+    array: number[], rows: number, cols: number): [number][number] {
+  var copy = this.slice(0);  // Copy all elements.
+  this.length = 0;           // Clear out existing array.
+
+  for (var r = 0; r < rows; r++) {
+    var row = [];
+    for (var c = 0; c < cols; c++) {
+      var i = r * cols + c;
+      if (i < copy.length) {
+        row.push(copy[i]);
       }
-      boardElement.appendChild(rowElement);
     }
-
-    worldElement.appendChild(boardElement);
-    this.rootElement.appendChild(worldElement);
-    return worldElement;
+    this.push(row);
   }
-}
+};
 
-class WorldContext {
-  worldDisplay: WorldDisplay;
-  world: Tensor2D;
-  worldNext: Tensor2D;
-  predictionElement: Element = null;
-
-  constructor(worlds: [Tensor2D, Tensor2D]) {
-    this.worldDisplay = new WorldDisplay();
-
-    this.world = worlds[0];
-    this.worldNext = worlds[1];
-    this.worldDisplay.displayWorld(this.world, 'Sequence');
-    this.worldDisplay.displayWorld(this.worldNext, 'Next Sequence');
-  }
-
-  displayPrediction(prediction: Tensor2D) {
-    if (this.predictionElement) {
-      this.predictionElement.remove();
-    }
-    this.predictionElement =
-        this.worldDisplay.displayWorld(prediction, 'Prediction');
-  }
-}
-
-class TrainDisplay {
-  element: Element;
-
-  constructor() {
-    this.element = document.querySelector('.train-display');
-  }
-
-  logCost(cost: number) {
-    const costElement = document.createElement('div');
-    costElement.setAttribute('class', 'cost');
-    costElement.innerText = '* Cost: ' + cost;
-    this.element.appendChild(costElement);
-  }
-
-  showStep(step: number, steps: number) {
-    this.element.innerHTML = 'Trained ' + Math.trunc(step / steps * 100) + '%';
-  }
-}
-
-// Setup game
-// const math = new NDArrayMathGPU();
-const game = new GameOfLife(5 /*, math*/);
-// const model = new GameOfLifeModel(game /*, math*/);
-const model = tf.sequential();
-model.add(
-    tf.layers.dense({inputShape: [5, 5], activation: 'sigmoid', units: 5}));
-model.add(
-    tf.layers.dense({inputShape: [5, 5], activation: 'sigmoid', units: 5}));
-model.add(
-    tf.layers.dense({inputShape: [5, 5], activation: 'sigmoid', units: 5}));
-
-// Helper classes for displaying worlds and training data:
-const trainDisplay = new TrainDisplay();
-const worldDisplay = new WorldDisplay();
-
-// List of worlds + display contexts.
-let worldContexts: Array<WorldContext> = [];
-
-const boardSizeInput =
-    document.getElementById('board-size-input') as HTMLTextAreaElement;
-const trainingSizeInput =
-    document.getElementById('training-size-input') as HTMLTextAreaElement;
-const learningRateInput =
-    document.getElementById('learning-rate-input') as HTMLTextAreaElement;
-const numLayersInput =
-    document.getElementById('num-layers-input') as HTMLTextAreaElement;
-const addSequenceButton = document.querySelector('.add-sequence-button');
-const trainButton = document.querySelector('.train-button');
-const predictButton = document.querySelector('.predict-button');
-const resetButton = document.querySelector('.reset-button');
-
-function getBoardSize() {
-  return parseInt(boardSizeInput.value);
-}
-
-function clearChildNodes(node: Element) {
-  while (node.hasChildNodes()) {
-    node.removeChild(node.lastChild);
-  }
-}
-
-let step = 0;
-let trainLength = 0;
-function trainAndRender() {
-  if (step == trainLength) {
-    trainButton.removeAttribute('disabled');
-    predictButton.removeAttribute('disabled');
-    resetButton.removeAttribute('disabled');
-    boardSizeInput.removeAttribute('disabled');
-    learningRateInput.removeAttribute('disabled');
-    trainingSizeInput.removeAttribute('disabled');
-    numLayersInput.removeAttribute('disabled');
-    return;
-  }
-
-  requestAnimationFrame(trainAndRender);
-  step++;
-
-  const fetchCost = step % 10 == 0;
-  const cost = model.trainBatch(fetchCost);
-
-  if (fetchCost) {
-    trainDisplay.showStep(step, trainLength);
-  }
-}
-
-addSequenceButton.addEventListener('click', () => {
-  game.setSize(getBoardSize());
-  worldContexts.push(new WorldContext(game.generateGolExample()));
-});
-
-trainButton.addEventListener('click', () => {
-  trainButton.setAttribute('disabled', 'disabled');
-  predictButton.setAttribute('disabled', 'disabled');
-  resetButton.setAttribute('disabled', 'disabled');
-  boardSizeInput.setAttribute('disabled', 'disabled');
-  learningRateInput.setAttribute('disabled', 'disabled');
-  trainingSizeInput.setAttribute('disabled', 'disabled');
-  numLayersInput.setAttribute('disabled', 'disabled');
-
-  const boardSize = getBoardSize();
-  const learningRate = parseFloat(learningRateInput.value);
-  const trainingSize = parseInt(trainingSizeInput.value);
-  const numLayers = parseInt(numLayersInput.value);
-
-  game.setSize(boardSize);
-  model.setupSession(boardSize, learningRate, numLayers);
-
-  step = 0;
-  trainLength = trainingSize;
-  trainAndRender();
-});
-
-predictButton.addEventListener('click', () => {
-  worldContexts.forEach((worldContext) => {
-    worldContext.displayPrediction(model.predict(worldContext.world));
+function getModel(game: GameOfLife): tf.Model {
+  const model = tf.sequential();
+  model.add(
+      tf.layers.dense({inputShape: [5, 5], activation: 'relu', units: 25}));
+  model.add(tf.layers.dense({activation: 'sigmoid', units: 25}));
+  model.add(tf.layers.dense({activation: 'sigmoid', units: 25}));
+  model.compile({
+    optimizer: tf.train.adam(),
+    loss: 'categoricalCrossentropy',
+    metrics: ['accuracy']
   });
-});
+  return model;
+}
 
-resetButton.addEventListener('click', () => {
-  worldContexts = [];
-  clearChildNodes(document.querySelector('.worlds-display'));
-  clearChildNodes(document.querySelector('.train-display'));
-});
+export class StartGame {
+  start(): void {
+    // Setup game
+    // const math = new NDArrayMathGPU();
+    const game = new GameOfLife(5 /*, math*/);
+    const model = getModel(game /*, math*/);
+    const batchSize = 50;
+
+    const inputs = [];
+    const outputs = [];
+    for (let i = 0; i < batchSize; i++) {
+      const example = game.generateGolExample();
+      inputs.push(example[0]);   //.reshape([game.size * game.size]));
+      outputs.push(example[1]);  //.reshape([game.size * game.size]));
+      // model.fit(
+      //     example[0].reshape([game.size * game.size]),
+      //     example[1].reshape([game.size * game.size]), {epochs: 10});
+    }
+    const trainData = tf.tensor2d(inputs);
+    const trainoutputsData = tf.tensor2d(outputs);
+    model.fit(trainData, trainoutputsData, {epochs: 100}).then((history) => {
+      console.log(history);
+      const example = game.generateGolExample();
+      example[0].print();
+      example[1].print();
+      model
+          .predict(tf.tensor2d(example[0].dataSync(), [1, 25]))[0]
+          // .reshape([game.size, game.size])
+          .print();
+    });
+  }
+}
+
+const game = new StartGame();
+game.start();
+// // Helper classes for displaying worlds and training data:
+// const trainDisplay = new TrainDisplay();
+// const worldDisplay = new WorldDisplay();
+
+// // List of worlds + display contexts.
+// let worldContexts: Array<WorldContext> = [];
+
+// const boardSizeInput =
+//     document.getElementById('board-size-input') as HTMLTextAreaElement;
+// const trainingSizeInput =
+//     document.getElementById('training-size-input') as HTMLTextAreaElement;
+// const learningRateInput =
+//     document.getElementById('learning-rate-input') as HTMLTextAreaElement;
+// const numLayersInput =
+//     document.getElementById('num-layers-input') as HTMLTextAreaElement;
+// const addSequenceButton = document.querySelector('.add-sequence-button');
+// const trainButton = document.querySelector('.train-button');
+// const predictButton = document.querySelector('.predict-button');
+// const resetButton = document.querySelector('.reset-button');
+
+// function getBoardSize() {
+//   return parseInt(boardSizeInput.value);
+// }
+
+// function clearChildNodes(node: Element) {
+//   while (node.hasChildNodes()) {
+//     node.removeChild(node.lastChild);
+//   }
+// }
+
+// let step = 0;
+// let trainLength = 0;
+// function trainAndRender() {
+//   if (step == trainLength) {
+//     trainButton.removeAttribute('disabled');
+//     predictButton.removeAttribute('disabled');
+//     resetButton.removeAttribute('disabled');
+//     boardSizeInput.removeAttribute('disabled');
+//     learningRateInput.removeAttribute('disabled');
+//     trainingSizeInput.removeAttribute('disabled');
+//     numLayersInput.removeAttribute('disabled');
+//     return;
+//   }
+
+//   requestAnimationFrame(trainAndRender);
+//   step++;
+
+//   const fetchCost = step % 10 == 0;
+//   const cost = model.trainBatch(fetchCost);
+
+//   if (fetchCost) {
+//     trainDisplay.showStep(step, trainLength);
+//   }
+// }
+
+// addSequenceButton.addEventListener('click', () => {
+//   game.setSize(getBoardSize());
+//   worldContexts.push(new WorldContext(game.generateGolExample()));
+// });
+
+// trainButton.addEventListener('click', () => {
+//   trainButton.setAttribute('disabled', 'disabled');
+//   predictButton.setAttribute('disabled', 'disabled');
+//   resetButton.setAttribute('disabled', 'disabled');
+//   boardSizeInput.setAttribute('disabled', 'disabled');
+//   learningRateInput.setAttribute('disabled', 'disabled');
+//   trainingSizeInput.setAttribute('disabled', 'disabled');
+//   numLayersInput.setAttribute('disabled', 'disabled');
+
+//   const boardSize = getBoardSize();
+//   const learningRate = parseFloat(learningRateInput.value);
+//   const trainingSize = parseInt(trainingSizeInput.value);
+//   const numLayers = parseInt(numLayersInput.value);
+
+//   game.setSize(boardSize);
+//   model.setupSession(boardSize, learningRate, numLayers);
+
+//   step = 0;
+//   trainLength = trainingSize;
+//   trainAndRender();
+// });
+
+// predictButton.addEventListener('click', () => {
+//   worldContexts.forEach((worldContext) => {
+//     worldContext.displayPrediction(model.predict(worldContext.world));
+//   });
+// });
+
+// resetButton.addEventListener('click', () => {
+//   worldContexts = [];
+//   clearChildNodes(document.querySelector('.worlds-display'));
+//   clearChildNodes(document.querySelector('.train-display'));
+// });
 
 
 
@@ -389,8 +443,9 @@ resetButton.addEventListener('click', () => {
 //     let costValue = -1;
 //     this.math.scope(() => {
 //       const cost = this.session.train(
-//           this.costTensor, this.feedEntries, this.batchSize, this.optimizer,
-//           shouldFetchCost ? CostReduction.MEAN : CostReduction.NONE);
+//           this.costTensor, this.feedEntries, this.batchSize,
+//           this.optimizer, shouldFetchCost ? CostReduction.MEAN :
+//           CostReduction.NONE);
 
 //       if (!shouldFetchCost) {
 //         return;
